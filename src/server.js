@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken')
 const server = express();
 
 var corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: 'https://ticketmanaget-front.herokuapp.com',
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
