@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-var connUser = mongoose.createConnection('mongodb://localhost/users', { useNewUrlParser: true })
+var connUser = mongoose.createConnection('mongodb://tocketmanager-vbp:Vitorbp123@ds143181.mlab.com:43181/ticket-manager-tickets', { useNewUrlParser: true })
 
 var UserSchema = new mongoose.Schema(
     {
