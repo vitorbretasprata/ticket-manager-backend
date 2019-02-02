@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-var connTicket = mongoose.createConnection('mongodb://tocketmanager-vbp:Vitorbp123@ds037990.mlab.com:37990/ticket-manager-users', { useNewUrlParser: true })
+var connTicket = mongoose.createConnection('mongodb://localhost/tickets', { useNewUrlParser: true })
 
 var TicketSchema = new mongoose.Schema(
     {
