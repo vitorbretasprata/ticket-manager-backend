@@ -1,5 +1,5 @@
 const express = require('express')
-const Ticket = require('../models/ticket')
+const Ticket = require('../schemas/ticket')
 
 const router = express();
 

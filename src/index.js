@@ -19,6 +19,7 @@ app.use(cors(corsOptions));
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tickets', require('./routes/tickets'));
+app.use('/api/admin', require('./routes/admin'));
 
 app.listen(port, () => {
     console.log(`Express listening on port ${port}...`)

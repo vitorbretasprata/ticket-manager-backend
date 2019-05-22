@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 
-const User = require('../models/user');
+const User = require('../schemas/user');
 const validator = require('../helpers/check');
 const { sendCode } = require('../helpers/mail')
 
