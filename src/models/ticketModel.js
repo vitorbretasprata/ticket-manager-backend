@@ -1,154 +1,220 @@
-const express = require('express')
-const Ticket = require('../models/ticket')
+const Ticket = require('../models/ticket');
+const validator = require("../helpers/check");
 
-const router = express();
+var query = {};
 
-var query = {
+const getTickets = async (req, res) => {
 
-};
+    const tickets = await Ticket.find({});
 
-router.get('/getTickets', (req, res) => {
-
-    Ticket.find({}, (err, tickets) => {
-        if(err){
-            return res.status(500).send({ error: err});
-        }
-
-        return res.status(200).send({ Tickets: tickets});
-    })
-})
-
-router.get('/getTicket/:id', (req, res) => {
-
-    Ticket.findById(req.params.id,
-        (err, Ticket) => {
-            if(err){
-            return res.status(500).send({ error: err });
-        }
-
-        return res.status(200).send({ Ticket: Ticket });
-    })
-})
-
-router.post('/createTicket', (req, res) => {
-    const filterID = Math.floor(Math.random() * 100000);
-    Ticket.create({
-        FilterID: filterID,
-        Title: req.body.Title,
-        Description: req.body.Description,
-        Importance: req.body.Importance,
-        Author: req.body.Author,
-        Client: req.body.Client,
-        Term: req.body.Term,
-        State: req.body.State,
-        Category: req.body.Category,
-        Comments: []
-    }, (err, Ticket) => {
-        if(err){
-            return res.status(500).send({ Error: err })
-        }
-
-        return res.status(200).send({ Ticket: Ticket })
-    })
-})
-
-router.put('/addComment/:id', (req, res) => {
-
-    let Comment = {    
-        Description: req.body.Description,
-        User: req.body.User              
+    if(!tickets) {
+        return res.status(404).send({
+            Status: false,
+            Message: "Tickets not found."
+        });
     }
 
-    Ticket.findByIdAndUpdate(req.params.id, 
-    {
-        $push: {
-            Comments: [{
-                Comment: Comment 
-            }]            
-        }
-    }, { new: true } ,
-    (err, Ticket) => {
-        if(err){
-            return res.status(500).send({ error: err })
-        }  
-        return res.status(200).send({ Comments: Ticket.Comments });               
-    });    
-});
+    return res.status(200).send({
+        Status: true,
+        Message: "Tickets gotten with success.",
+        tickets
+    });
+}
 
-router.post('/filter', (req, res) => {
-    query = {};
+const getTicket = async (req, res) => {
 
-    if(req.body.ID){        
-        query.FilterID = req.body.ID;    
+    const ticket = await Ticket.findById(req.params.id);
+
+    if(!ticket) {
+        return res.status(404).send({
+            Status: false,
+            Message: "Ticket not found."
+        });
     }
-    if(req.body.Title){
-        query.Title = { $regex: '.*' + req.body.Title + '.*' };    
-    }
-    if(req.body.Client){
-        query.Client = { $regex: '.*' + req.body.Client + '.*' };    
-    }
-    if(req.body.Importance){
-        query.Importance = req.body.Importance;    
-    }
-    if(req.body.Author){
-        query.Author = req.body.Author;    
-    }
-    if(req.body.Category){
-        query.Category = req.body.Category;    
-    }   
-    if(req.body.State){
-        query.State = req.body.State;    
-    }  
+
+    return res.status(200).send({
+        Status: true,
+        Message: "Tickets gotten with success.",
+        ticket
+    });
+}
+
+const createTicket = async (req, res) => {
+
+    try {
+
+        const context = await validator.contextValidation(res, req.body, { 
+            Title: 'required|string|maxLength:50',
+            Description: 'required|string|maxLength:500',
+            Importance: 'required|string',
+            Author: 'required|string',
+            Client: 'required|string',
+            Term: 'required|string',
+            State: 'required|string',
+            Category: 'required|string'
+         });
+            
+        let filterID = Math.floor(Math.random() * 100000);
     
-    Ticket.find(query, (err, Ticket) => {
-        if(err){
-            return res.status(500).send({ error: err });
-        }        
-
-        return res.status(200).send({ Ticket: Ticket, Query: query });
-    });
-});
-
-router.delete('/deleteTicket/:id',  (req, res) => {
-
-    Ticket.findByIdAndDelete(req.params.id, (err, Ticket) => {
-        if(err){
-            return res.status(500).send({ error: err })
+        const tickets = await Ticket.find({}, "FilterID");
+    
+        while(filterID in tickets) {
+            filterID = Math.floor(Math.random() * 100000);
         }
+    
+        context.FilterID = filterID;
+        context.Comments = []
+    
+        await Ticket.create(valid);   
+    
+        return res.status(200).send({
+            Status: true,
+            Message: "Ticket saved."
+        });
 
-        return res.status(200).send({ Ticket: Ticket })
-    });
-});
+    } catch(error) {
+        return res.status(500).send({
+            Status: false,
+            Message: "Something happened while trying to proccess the request."
+        });
+    }    
+}
 
-router.delete('/deleteTickets', (req, res) => {
-    Ticket.deleteMany({}, (err, ticket) => {
-        if(!err){
-            res.status(200).send({ Tickets: ticket });
+const addComment = async (req, res) => {
+    
+    try {
+        const context = await validator.contextValidation(res, req.body, { Description: 'required|string|maxLength:500', User: 'required|string'});
+
+        await Ticket.findByIdAndUpdate(req.params.id, {
+            $push: {
+                Comments: [{
+                    Comment: context
+                }]
+            }
+        });
+
+        return res.status(200).send({
+            Status: true,
+            Message: "Comment added."
+        });
+
+    } catch (error) {
+        return res.status(500).send({
+            Status: false,
+            Message: "Something happened while trying to proccess the request."
+        });
+    }
+}
+
+const Filter = async (req, res) => {
+    try {
+
+        const context = await validator.contextValidation(res, req.body, { 
+            ID: 'int|maxLength:50',
+            Title: 'string|maxLength:500',
+            Client: 'string',
+            Importance: 'string',
+            Author: 'string',
+            State: 'string',
+            Category: 'string'
+        });
+        
+        query = {};
+
+        if(context.ID){        
+            query.FilterID = context.ID;    
         }
-        else{
-            throw err;
+        if(context.Title){
+            query.Title = { $regex: '.*' + context.Title + '.*' };    
         }
-    });
-});
-
-router.put('/alterTicket/:id', (req, res) => {
-
-    Ticket.findByIdAndUpdate(req.params.id, {
-
-        Title: req.body.Title,
-        Description: req.body.Description,
-        Importance: req.body.Importance,
-        Author: req.body.Author,
-        Client: req.body.Client,
-        Term: req.body.Term,
-        State: req.body.State,
-        Category: req.body.Category
-     }, { new: true } , (err, Ticket) => {
-        if(err){
-            return res.status(500).send({ error: err });
+        if(context.Client){
+            query.Client = { $regex: '.*' + context.Client + '.*' };    
         }
-        return res.status(200).send({ Ticket: Ticket }) ;    
-    });    
-});
+        if(context.Importance){
+            query.Importance = context.Importance;    
+        }
+        if(context.Author){
+            query.Author = context.Author;    
+        }
+        if(context.Category){
+            query.Category = context.Category;    
+        }   
+        if(context.State){
+            query.State = context.State;    
+        } 
+        
+        const tickets = await Ticket.find(context);
 
-module.exports = router
+        return res.status(200).send({
+            Status: true,
+            Message: "Tickets retrieved.",
+            tickets
+        });    
+
+    } catch (error) {
+        return res.status(500).send({
+            Status: false,
+            Message: "Something happened while trying to proccess the request."
+        });
+    }
+}
+
+const deleteTicket = async (req, res) => {
+
+    try {
+
+        Ticket.findOneAndDelete({ ID: req.params.id });
+
+        return res.status(200).send({
+            Status: false,
+            Message: "Ticket deleted."
+        });
+
+    } catch (error) {
+        return res.status(500).send({
+            Status: false,
+            Message: "Something happened while trying to proccess the request."
+        });
+    }
+}
+
+const editTicket = async (req, res) => {
+    
+    try {
+
+        const context = validator.contextValidation(res, req.body, { 
+            Title: 'string|maxLength:50',
+            Description: 'string|maxLength:500',
+            Importance: 'string',
+            Author: 'string',
+            Client: 'string',
+            Term: 'string',
+            State: 'string',
+            Category: 'string'
+        });
+    
+        await Ticket.findOneAndUpdate(req.params.id, context, { new: true });
+
+        return res.status(200).send({
+            Status: true,
+            Message: "Tickets successfully edited."
+        });
+
+    } catch (error) {
+        return res.status(500).send({
+            Status: false,
+            Message: "Something happened while trying to proccess the request."
+        });
+    }
+}
+
+
+module.exports = {
+    getTickets,
+    getTicket,
+    createTicket,
+    addComment,
+    Filter,
+    editTicket,
+    deleteTicket
+}

@@ -7,21 +7,18 @@ const { sendCode } = require('../helpers/mail')
 const Register = async (req, res) => {
     try {
 
-        const checkValid = validator.check(req.body.userInfo, { name: 'required|string|min:2', email: 'required|email', password: 'required|min:8', login: 'required|string|min:2'})
-        const valid = await checkValid.check();
+        const context = await validator.contextValidation(res, req.body, { 
+            Name: 'required|string|minLength:2',
+            Email: 'required|email',
+            Password: 'required|minLength:8',
+            Login: 'required|string|minLength:2',
+            Team: 'required|string',
+            Occupation: 'required|string'
+        });
     
-        let encryptedPassword = await bcrypt.hash(valid.password, 10);
+        context.Password = await bcrypt.hash(context.Password, 10);      
     
-        const body = {
-            Name: valid.name,
-            Email: valid.email,
-            Password: encryptedPassword,
-            Occupation: valid.occupation,
-            Team: valid.team,
-            Login: valid.login
-        }
-    
-        await User.create(body);
+        await User.create(context);
     
         return res.status(200).send({
             Status: true,
@@ -41,19 +38,18 @@ const Login = async (req, res) => {
 
     try {
 
-        const checkValid = validator.check(req.body, { email: 'required|email', password: 'required|string' })
-        const valid = await checkValid.check();
+        const context = await validator.contextValidation(res, req.body, { email: 'required|email', password: 'required|string' });
     
-        if(!valid) {
+        if(!context) {
             return res.status(422).send({
                 Status: false,
                 Message: "Invalid user."
             });
         }
     
-        let encryptedPassword = await bcrypt.hash(req.body.password, 10);
+        let encryptedPassword = await bcrypt.hash(context.password, 10);
     
-        const user = await User.findOne({ username: req.body.username, password: encryptedPassword })
+        const user = await User.findOne({ username: context.username, password: encryptedPassword })
     
         if(!user) {
             return res.status(404).send({
@@ -83,9 +79,8 @@ const checkEmail = async (req, res) => {
 
     try {
 
-        const checkValid = validator.check(req.body, { email: 'required|email' })
-        const valid = await checkValid.check();
-    
+        const context = await validator.contextValidation(res, req.body, { email: 'required|email' });
+
         if(!valid) {
             return res.status(422).send({
                 Status: false,
@@ -93,7 +88,7 @@ const checkEmail = async (req, res) => {
             });
         }
     
-        const email = await User.findOne({ Email: req.body.email });
+        const email = await User.findOne({ Email: context.email });
     
         if(!email) {
             return res.status(422).send({
@@ -102,7 +97,7 @@ const checkEmail = async (req, res) => {
             });
         }
     
-        const sentMessage = await sendCode(req.body.email);
+        const sentMessage = await sendCode(context.email);
     
         if(!sentMessage) {
             return res.status(422).send({
@@ -124,8 +119,10 @@ const checkEmail = async (req, res) => {
 const resetPassword = async (req, res) => {
 
     try {
+
+        const context = await validator.contextValidation(res, req.body, { password: 'required|string|min:8', confirm:'required|same:confirm_password' });
         
-        let encryptedPassword = await bcrypt.hash(req.body.password, 10);
+        let encryptedPassword = await bcrypt.hash(context.password, 10);
 
         const user = await User.findOneAndUpdate(req.body.email, { $set: { Password: encryptedPassword }});
     
@@ -146,9 +143,7 @@ const resetPassword = async (req, res) => {
             Message: "Somethig failed when changing the password."
         });
     }    
-}
-       
-    
+}    
 
 module.exports = {
     Register,
