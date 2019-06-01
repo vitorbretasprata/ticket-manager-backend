@@ -1,13 +1,11 @@
-function errorHandler() {}
-
-Error.prototype.handler = function(source, message, status){
-    return {
-        status,
-        source,
-        message
-    };
+function serverError(source, message, status, details = "") {
+    this.source = source;
+    this.message = message;
+    this.code = status;
+    this.details = details;
+    this.stack = new Error().stack;
 }
 
-errorHandler.prototype = Object.create(Error.prototype);
+serverError.prototype = new Error();
 
-module.exports = errorHandler;
+module.exports = serverError;

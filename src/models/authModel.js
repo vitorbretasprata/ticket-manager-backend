@@ -3,26 +3,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../schemas/user');
 const validator = require('../helpers/check');
 const { sendCode } = require('../helpers/mail');
-const errorHandler = require("../prototypes/handleError");
-
-
-var MyError3 = (function() {
-    function F(){}
-    function CustomError() {
-       var _this = (this===window) ? new F() : this,
-           tmp = Error.prototype.constructor.apply(_this,arguments)
-       ;
-       for (var i in tmp) {
-          if (tmp.hasOwnProperty(i)) _this[i] = tmp[i];
-       }
-       return _this;
-    }
-    function SubClass(){}
-    SubClass.prototype = Error.prototype;
-    F.prototype = CustomError.prototype = new SubClass();
-    CustomError.prototype.constructor = CustomError;
-    return CustomError;
- })();
+const serverError = require('../prototypes/handleError');
 
 const Register = async (req, res) => {
 
@@ -34,6 +15,10 @@ const Register = async (req, res) => {
         Team: 'required|string',
         Occupation: 'required|string'
     });
+
+    if(!context) {
+        throw new serverError("Register", "Invalid fields", 422, context);
+    }
 
     context.Password = await bcrypt.hash(context.Password, 10);      
 
@@ -50,7 +35,7 @@ const Login = async (req, res) => {
     const context = await validator.contextValidation(res, req.body, { email: 'required|email', password: 'required|string' });
 
     if(!context) {
-        throw new MyError3("teste");
+        throw new serverError("Login", "Invalid email or password", 422);
     }
 
     let encryptedPassword = await bcrypt.hash(context.password, 10);
@@ -58,10 +43,7 @@ const Login = async (req, res) => {
     const user = await User.findOne({ username: context.username, password: encryptedPassword })
 
     if(!user) {
-        return res.status(404).send({
-            Status: false,
-            Message: "User not found."
-        });
+        throw new serverError("Login", "User not found.", 500);
     }
 
     const token = await generateToken(user);
@@ -77,20 +59,14 @@ const checkEmail = async (req, res) => {
 
     const context = await validator.contextValidation(res, req.body, { email: 'required|email' });
 
-    if(!valid) {
-        return res.status(422).send({
-            Status: false,
-            Message: "Invalid email."
-        });
+    if(!context) {
+        throw new serverError("Check Email", "Invalid email.", 422);
     }
 
     const email = await User.findOne({ Email: context.email });
 
     if(!email) {
-        return res.status(422).send({
-            Status: false,
-            Message: "Email not found on our database."
-        });
+        throw new serverError("Check Email", "Email not found.", 404);
     }
 
     const sentMessage = await sendCode(context.email);
@@ -114,11 +90,9 @@ const resetPassword = async (req, res) => {
     const user = await User.findOneAndUpdate(req.body.email, { $set: { Password: encryptedPassword }});
 
     if(!user) {
-        return res.status(422).send({
-            Status: false,
-            Message: "Somethig failed when changing the password."
-        });
+        throw new serverError("Reset Password", "Somethig failed when changing the password.", 422);
     }
+
     return res.status(200).send({
         Status: true,
         Message: "Successfuly changed password."
