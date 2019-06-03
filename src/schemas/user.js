@@ -36,6 +36,10 @@ var UserSchema = new mongoose.Schema(
             required: true,
             trim: true
         },
+        Role: {
+            type: String,
+            required: true
+        },
         recoveryCode: {
             type: String,
             trim: true,

@@ -4,6 +4,7 @@ const User = require('../schemas/user');
 const validator = require('../helpers/check');
 const { sendCode } = require('../helpers/mail');
 const serverError = require('../prototypes/handleError');
+const { generateToken } = require("../helpers/checkJWT");
 
 const Register = async (req, res) => {
 
@@ -13,7 +14,8 @@ const Register = async (req, res) => {
         Password: 'required|minLength:8',
         Login: 'required|string|minLength:2',
         Team: 'required|string',
-        Occupation: 'required|string'
+        Occupation: 'required|string',
+        Role: 'required|string'
     });
 
     if(!context) {
@@ -51,7 +53,7 @@ const Login = async (req, res) => {
     return res.status(200).send({
         Status: true, 
         Message: "User logged in.",
-        Token: token
+        token
     });        
 }
 

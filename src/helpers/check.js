@@ -22,8 +22,15 @@ const contextValidation = async (res, context, constraints, message) => {
 
 
         for (key in constraints) {
-            if (key.indexOf('.') > 0) key = key.substr(0, key.indexOf('.'))
-            if (key in newContext) continue
+            
+            if (key.indexOf('.') > 0) {
+                key = key.substr(0, key.indexOf('.'));
+            } 
+
+            if (key in newContext) {
+                continue;
+            } 
+
             newContext[key] = context[key]
         }
 
