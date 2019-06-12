@@ -14,7 +14,7 @@ const Login = async (req, res) => {
         const response = await authModel.Login(req, res);
         return response;
     } catch (error) {
-        return error;
+        return res.send({error});
     }
 }
 

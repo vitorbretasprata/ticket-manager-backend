@@ -25,17 +25,7 @@ var UserSchema = new mongoose.Schema(
         Password: {
             type: String,
             required: true            
-        },
-        Occupation: {
-            type: String,
-            required: true,
-            trim: true
         },        
-        Team: {
-            type: String,
-            required: true,
-            trim: true
-        },
         Role: {
             type: String,
             required: true

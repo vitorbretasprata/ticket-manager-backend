@@ -37,7 +37,7 @@ const contextValidation = async (res, context, constraints, message) => {
         return newContext
     }
     catch (error) {
-        return catchServerError(res, 'Utils-contextValidation', error)
+        return error;
     }
 }
 

@@ -4,12 +4,12 @@ const serverError = require('../prototypes/handleError');
 const generateToken = async (user) => {
 
     const payload = {
-        id : user._id,
+        id : user.id,
         name : user.Name,
         role: user.Role
     };
 
-    let token = jwt.sign({ payload }, config.secret, { expiresIn: 432000 });
+    let token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: 432000 });
 
     if(!token) {
         throw new serverError("Auth", "Error on generating token", 500);

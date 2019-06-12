@@ -1,5 +1,6 @@
 const Ticket = require('../schemas/ticket');
 const validator = require("../helpers/check");
+const serverError = require('../prototypes/handleError');
 
 var query = {};
 
@@ -75,13 +76,17 @@ const addComment = async (req, res) => {
     
     const context = await validator.contextValidation(res, req.body, { Description: 'required|string|maxLength:500', User: 'required|string'});
 
-    await Ticket.findByIdAndUpdate(req.params.id, {
+    const update = await Ticket.findByIdAndUpdate(req.params.id, {
         $push: {
             Comments: [{
                 Comment: context
             }]
         }
     });
+
+    if(!update) {
+        throw new serverError("Ticket", "Something happened while adding a comment", 422);
+    }
 
     return res.status(200).send({
         Status: true,
@@ -128,6 +133,10 @@ const Filter = async (req, res) => {
     
     const tickets = await Ticket.find(context);
 
+    if(!tickets) {
+        throw new serverError("Ticket", "Something happened while filtering.", 422);
+    }
+
     return res.status(200).send({
         Status: true,
         Message: "Tickets retrieved.",
@@ -137,7 +146,11 @@ const Filter = async (req, res) => {
 
 const deleteTicket = async (req, res) => {    
 
-    Ticket.findOneAndDelete({ ID: req.params.id });
+    const deleted = Ticket.findOneAndDelete({ ID: req.params.id });
+
+    if(!deleted) {
+        throw new serverError("Ticket", "Something happened while deleting the ticket.", 422);
+    }
 
     return res.status(200).send({
         Status: false,
@@ -158,7 +171,11 @@ const editTicket = async (req, res) => {
         Category: 'string'
     });
 
-    await Ticket.findOneAndUpdate(req.params.id, context, { new: true });
+    const upated = await Ticket.findOneAndUpdate(req.params.id, context, { new: true });
+
+    if(!upated) {
+        throw new serverError("Ticket", "Something happened while updating the ticket.", 422);
+    }
 
     return res.status(200).send({
         Status: true,
