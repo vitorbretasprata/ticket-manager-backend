@@ -9,13 +9,7 @@ const contextValidation = async (res, context, constraints, message) => {
         const validator = valid(context, constraints);
 
         if (!(await validator.check())) {
-            let error = valid.messages({
-                required: 'The :attribute field must not be empty.',
-                email: 'E-mail must be a valid email address.',
-                even: 'The value of the field must be even number.',
-                status: 'Invalid status'
-            });
-            return error;
+            return "Error"
         }
 
         let newContext = {}

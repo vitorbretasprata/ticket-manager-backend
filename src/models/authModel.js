@@ -19,15 +19,9 @@ const Register = async (req, res) => {
     if(!context) {
         throw new serverError("Register", "Invalid fields", 422, context);
     }
-
-    var salt = bcrypt.genSaltSync(10);
-
-    context.Password = bcrypt.hashSync(context.Password, salt);
     
     const email = await User.findOne({ email: context.email });
-
     const login = await User.findOne({ login: context.login });
-
 
     if(email) {
         throw new serverError('Register', 'Emails already being used.', 422);
@@ -36,6 +30,9 @@ const Register = async (req, res) => {
     if(login) {
         throw new serverError('Register', 'Login name already being used.', 422);
     }
+
+    var salt = bcrypt.genSaltSync(10);
+    context.Password = bcrypt.hashSync(context.Password, salt);
 
     await User.create(context);
 
@@ -47,21 +44,23 @@ const Register = async (req, res) => {
 
 const Login = async (req, res) => {    
 
-    const context = await validator.contextValidation(res, req.body, { email: 'required|email', password: 'required|string' });
+    const context = await validator.contextValidation(res, req.body, { Email: 'required|email', Password: 'required|string' });
 
     if(!context) {
         throw new serverError("Login", "Invalid email or password", 422);
     }
 
-    var salt = await bcrypt.genSaltSync(10);
-
-    let encryptedPassword = bcrypt.hashSync(context.password, salt);
-
-    const user = await User.findOne({ Email: context.email, Password: encryptedPassword });
+    let user = await User.findOne({ Email: context.Email });
 
     if(!user) {
         throw new serverError("Login", "Email and password does not match.", 404);
     }
+
+    const compare = bcrypt.compareSync(context.Password, user.Password);
+
+    if(!compare) {
+        throw new serverError("Login", "Email and password does not match.", 404);
+    }    
 
     const token = await generateToken(user);
 
