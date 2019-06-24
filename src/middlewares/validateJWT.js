@@ -4,7 +4,7 @@ const validateJWT = async (req, res, next) => {
     try {
         const token = await checkJWT(req, res);
 
-        if(!token.status) {
+        if(!token) {
             throw new Error("Token Invalid");
         }
 
@@ -12,7 +12,7 @@ const validateJWT = async (req, res, next) => {
         res.accountId = token.id;
         res.role = token.role;
 
-        next();          
+        return next();          
 
     } catch (error) {
         return  {

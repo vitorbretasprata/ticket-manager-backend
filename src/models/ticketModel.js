@@ -4,7 +4,7 @@ const serverError = require('../prototypes/handleError');
 
 var query = {};
 
-const getTickets = async (req, res) => {
+const requestTickets = async (req, res) => {
 
     const tickets = await Ticket.find({});
 
@@ -22,7 +22,7 @@ const getTickets = async (req, res) => {
     });
 }
 
-const getTicket = async (req, res) => {
+const requestTicket = async (req, res) => {
 
     const ticket = await Ticket.findById(req.params.id);
 
@@ -185,8 +185,8 @@ const editTicket = async (req, res) => {
 
 
 module.exports = {
-    getTickets,
-    getTicket,
+    requestTickets,
+    requestTicket,
     createTicket,
     addComment,
     Filter,

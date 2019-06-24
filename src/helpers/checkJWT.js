@@ -21,8 +21,8 @@ const generateToken = async (user) => {
 const checkJWT = async (req) => {
     try {
         
-        const token = (req.headers['authorization'] || req.headers['authorization-token'] || req.headers['x-access-token']).match(/^Bearer (.+)/);
-        const valid = await jwt.verify(token[1], process.env.SECRET_KEY);
+        var token = req.headers.authorization.split(' ')[1];
+        const valid = await jwt.verify(token, process.env.SECRET_KEY);
         return valid;        
 
     } catch (error) {

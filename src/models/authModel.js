@@ -64,10 +64,13 @@ const Login = async (req, res) => {
 
     const token = await generateToken(user);
 
+    const Name = user.Name;
+
     return res.status(200).send({
         Status: true, 
         Message: "User logged in.",
-        token
+        token,
+        Name
     });        
 }
 
