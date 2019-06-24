@@ -5,7 +5,7 @@ const Register = async (req, res) => {
         const response = await authModel.Register(req, res);
         return response;
     } catch (error) {
-        return error;
+        return res.send({ error });
     }
 }
 
@@ -23,7 +23,7 @@ const resetPassword = async (req, res) => {
         const response = await authModel.resetPassword(req, res);
         return response;
     } catch (error) {
-        return error;
+        return res.send({ error });
     }
 }
 
@@ -32,7 +32,7 @@ const checkEmail = async (req, res) => {
         const response = await authModel.checkEmail(req, res);
         return response;
     } catch (error) {
-        return error;
+        return res.send({ error });
     }
 }
 
