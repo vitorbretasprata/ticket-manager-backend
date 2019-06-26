@@ -2,9 +2,9 @@ const { checkJWT } = require('../helpers/checkJWT')
 
 const validateJWT = async (req, res, next) => {
     try {
-        const token = await checkJWT(req, res);
+        const token = await checkJWT(req);
 
-        if(!token) {
+        if(!token.status == false) {
             throw new Error("Token Invalid");
         }
 

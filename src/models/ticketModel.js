@@ -5,8 +5,13 @@ const serverError = require('../prototypes/handleError');
 var query = {};
 
 const requestTickets = async (req, res) => {
+    let tickets;
 
-    const tickets = await Ticket.find({});
+    if(res.role == 'admin' || res.role == 'user') {
+        tickets = await Ticket.find({ CreatorID: req.accountId }, "FilterID Title Category State");
+    } else {
+        tickets = await Ticket.find({ CreatorID: req.CompanyID }, "FilterID Title Category State");
+    }
 
     if(!tickets) {
         return res.status(404).send({
@@ -51,7 +56,7 @@ const createTicket = async (req, res) => {
         Term: 'required|string',
         State: 'required|string',
         Category: 'required|string'
-        });
+    });
         
     let filterID = Math.floor(Math.random() * 100000);
 
@@ -60,11 +65,12 @@ const createTicket = async (req, res) => {
     while(filterID in tickets) {
         filterID = Math.floor(Math.random() * 100000);
     }
-
+    
+    context.CreatorID = req.accountId;
     context.FilterID = filterID;
     context.Comments = []
 
-    await Ticket.create(valid);   
+    await Ticket.create(context);   
 
     return res.status(200).send({
         Status: true,

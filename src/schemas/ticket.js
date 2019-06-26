@@ -8,6 +8,11 @@ var TicketSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
+        CreatorID: {
+            type: mongoose.Types.ObjectId,
+            required: true
+        },
+        CompanyID:  mongoose.Types.ObjectId,
         Title: {
             type: String,
             required: true,
