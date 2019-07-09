@@ -62,15 +62,15 @@ const Login = async (req, res) => {
         throw new serverError("Login", "Email and password does not match.", 404);
     }    
 
+    const name = user.Name;
+
     const token = await generateToken(user);
-
-    const Name = user.Name;
-
+    
     return res.status(200).send({
         Status: true, 
         Message: "User logged in.",
         token,
-        Name
+        name
     });        
 }
 

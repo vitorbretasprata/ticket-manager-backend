@@ -9,6 +9,7 @@ const validateJWT = async (req, res, next) => {
         }
 
         req.accountId = token.id;
+        req.name = token.name;
         res.accountId = token.id;
         res.role = token.role;
 

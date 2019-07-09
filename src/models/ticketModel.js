@@ -8,9 +8,9 @@ const requestTickets = async (req, res) => {
     let tickets;
 
     if(res.role == 'admin' || res.role == 'user') {
-        tickets = await Ticket.find({ CreatorID: req.accountId }, "FilterID Title Category State");
+        tickets = await Ticket.find({ CreatorID: req.accountId }, "FilterID Title Category Status").sort([['DateCreated', -1]]);
     } else {
-        tickets = await Ticket.find({ CreatorID: req.CompanyID }, "FilterID Title Category State");
+        tickets = await Ticket.find({ CreatorID: req.CompanyID }, "FilterID Title Category Status").sort([['DateCreated', -1]]);
     }
 
     if(!tickets) {
@@ -48,13 +48,12 @@ const requestTicket = async (req, res) => {
 const createTicket = async (req, res) => {    
 
     const context = await validator.contextValidation(res, req.body, { 
-        Title: 'required|string|maxLength:50',
-        Description: 'required|string|maxLength:500',
+        Title: 'required|string|maxLength:80',
+        Description: 'required|string|maxLength:5000',
         Importance: 'required|string',
-        Author: 'required|string',
         Client: 'required|string',
         Term: 'required|string',
-        State: 'required|string',
+        Status: 'required|string',
         Category: 'required|string'
     });
         
@@ -68,6 +67,7 @@ const createTicket = async (req, res) => {
     
     context.CreatorID = req.accountId;
     context.FilterID = filterID;
+    context.Author = req.name;
     context.Comments = []
 
     await Ticket.create(context);   
@@ -80,19 +80,17 @@ const createTicket = async (req, res) => {
 
 const addComment = async (req, res) => {    
     
-    const context = await validator.contextValidation(res, req.body, { Description: 'required|string|maxLength:500', User: 'required|string'});
+    const context = await validator.contextValidation(res, req.body, { Description: 'required|string|maxLength:1000'});
 
-    const update = await Ticket.findByIdAndUpdate(req.params.id, {
+    context.User = req.name;
+
+    await Ticket.findByIdAndUpdate(req.params.id, {
         $push: {
             Comments: [{
                 Comment: context
             }]
         }
-    });
-
-    if(!update) {
-        throw new serverError("Ticket", "Something happened while adding a comment", 422);
-    }
+    });    
 
     return res.status(200).send({
         Status: true,
@@ -104,12 +102,12 @@ const addComment = async (req, res) => {
 const Filter = async (req, res) => {    
 
     const context = await validator.contextValidation(res, req.body, { 
-        ID: 'int|maxLength:50',
+        ID: 'string|maxLength:50',
         Title: 'string|maxLength:500',
         Client: 'string',
         Importance: 'string',
         Author: 'string',
-        State: 'string',
+        Status: 'string',
         Category: 'string'
     });
     
@@ -133,11 +131,13 @@ const Filter = async (req, res) => {
     if(context.Category){
         query.Category = context.Category;    
     }   
-    if(context.State){
-        query.State = context.State;    
+    if(context.Status){
+        query.Status = context.Status;    
     } 
+
+    query.CreatorID = req.accountId;
     
-    const tickets = await Ticket.find(context);
+    const tickets = await Ticket.find(query);
 
     if(!tickets) {
         throw new serverError("Ticket", "Something happened while filtering.", 422);
@@ -152,11 +152,7 @@ const Filter = async (req, res) => {
 
 const deleteTicket = async (req, res) => {    
 
-    const deleted = Ticket.findOneAndDelete({ ID: req.params.id });
-
-    if(!deleted) {
-        throw new serverError("Ticket", "Something happened while deleting the ticket.", 422);
-    }
+    await Ticket.findOneAndDelete({ _id: req.params.id });
 
     return res.status(200).send({
         Status: false,
@@ -166,18 +162,19 @@ const deleteTicket = async (req, res) => {
 
 const editTicket = async (req, res) => {    
 
-    const context = validator.contextValidation(res, req.body, { 
+    const context = await validator.contextValidation(res, req.body, { 
         Title: 'string|maxLength:50',
         Description: 'string|maxLength:500',
         Importance: 'string',
-        Author: 'string',
         Client: 'string',
         Term: 'string',
-        State: 'string',
+        Status: 'string',
         Category: 'string'
     });
 
-    const upated = await Ticket.findOneAndUpdate(req.params.id, context, { new: true });
+    context.Author = req.name;
+
+    const upated = await Ticket.findOneAndUpdate(req.params.id, context);
 
     if(!upated) {
         throw new serverError("Ticket", "Something happened while updating the ticket.", 422);

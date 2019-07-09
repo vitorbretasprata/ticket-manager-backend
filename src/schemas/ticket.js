@@ -47,7 +47,7 @@ var TicketSchema = new mongoose.Schema(
             type: Date,            
             default: Date.now('dd.mm.yyyy')
         },
-        State:{
+        Status:{
             type: String,
             required: true            
         },
