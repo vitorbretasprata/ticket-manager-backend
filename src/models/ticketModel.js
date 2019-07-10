@@ -50,11 +50,11 @@ const createTicket = async (req, res) => {
     const context = await validator.contextValidation(res, req.body, { 
         Title: 'required|string|maxLength:80',
         Description: 'required|string|maxLength:5000',
-        Importance: 'required|string',
-        Client: 'required|string',
-        Term: 'required|string',
-        Status: 'required|string',
-        Category: 'required|string'
+        Importance: 'string',
+        Client: 'string',
+        Term: 'string',
+        Status: 'string',
+        Category: 'string'
     });
         
     let filterID = Math.floor(Math.random() * 100000);
