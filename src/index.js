@@ -1,4 +1,5 @@
 require('dotenv').config();
+const compression = require('compression');
 const express = require('express');
 const app = express();
 require('http').Server(app);
@@ -13,6 +14,7 @@ var corsOptions = {
 
 const port = process.env.PORT || 2000;
 
+app.use(compression());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors(corsOptions));
