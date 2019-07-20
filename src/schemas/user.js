@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-var connUser = mongoose.createConnection('mongodb://localhost/users', { useNewUrlParser: true })
+var connUser = mongoose.createConnection(process.env.MONGO_URL_USER, { useNewUrlParser: true })
 
 var UserSchema = new mongoose.Schema(
     {
