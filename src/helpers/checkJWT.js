@@ -18,7 +18,7 @@ const generateToken = async (user) => {
     return token;
 }
 
-const checkJWT = async (req) => {
+const checkJWT = async (req, res) => {
     try {
         
         var token = req.headers.authorization.split(' ')[1];
@@ -26,10 +26,10 @@ const checkJWT = async (req) => {
         return valid;        
 
     } catch (error) {
-        return  {
+        return  res.status(500).send({
             status: false,
-            message: 'Token invalid'            
-        };
+            message: 'Token invalid'   
+        });
     }    
 }
 
