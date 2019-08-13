@@ -186,6 +186,77 @@ const editTicket = async (req, res) => {
     });
 }
 
+const requestInfo = async (req, res) => {
+    let news, completed, active, deadline;
+
+    const date = new Date();
+
+    if(res.role == 'admin' || res.role == 'user') {
+        news = await Ticket.countDocuments({ CreatorID: req.accountId });
+        completed = await Ticket.countDocuments(
+            { 
+                CreatorID: req.accountId, 
+                $or:[{
+                    status: 'Done'
+                },{
+                    status: 'Delivered'
+                },{
+                    status: 'Archived'
+                }]
+            });
+        active = await Ticket.countDocuments(
+            { 
+                CreatorID: req.accountId, 
+                $or:[{
+                    status: 'To Do'
+                },{
+                    status: 'Doing'
+                }]
+            });
+        deadline = await Ticket.countDocuments(
+            { 
+                CreatorID: req.accountId, 
+                Term: { $gte: date }
+            });
+    } else {
+        news = await Ticket.countDocuments({ CreatorID: req.CompanyID });
+        completed = await Ticket.countDocuments(
+            { 
+                CreatorID: req.CompanyID, 
+                $or:[{
+                    status: 'Done'
+                },{
+                    status: 'Delivered'
+                },{
+                    status: 'Archived'
+                }]
+            });
+        active = await Ticket.countDocuments(
+            { 
+                CreatorID: req.CompanyID, 
+                $or:[{
+                    status: 'To Do'
+                },{
+                    status: 'Doing'
+                }]
+            });
+        deadline = await Ticket.countDocuments(
+            { 
+                CreatorID: req.CompanyID, 
+                Term: { $gte: date }
+            });
+    }
+
+    return res.status(200).send({
+        Status: true,
+        Message: "Info successfuly got.",
+        news,
+        completed,
+        active,
+        deadline
+    });
+}
+
 
 module.exports = {
     requestTickets,
@@ -194,5 +265,6 @@ module.exports = {
     addComment,
     Filter,
     editTicket,
-    deleteTicket
+    deleteTicket,
+    requestInfo
 }

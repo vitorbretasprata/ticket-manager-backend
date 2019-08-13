@@ -63,6 +63,15 @@ const editTicket = async (req, res) => {
     }
 }
 
+const requestInfo = async (req, res) => {
+    try {
+        const response = await ticketModel.requestInfo(req, res);
+        return response;
+    } catch (error) {
+        return res.send({ error });
+    }
+}
+
 module.exports = {
     requestTickets,
     requestTicket,
@@ -70,5 +79,6 @@ module.exports = {
     addComment,
     Filter,
     deleteTicket,
-    editTicket
+    editTicket,
+    requestInfo
 };
