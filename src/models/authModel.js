@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 
 const User = require('../schemas/user');
 const validator = require('../helpers/check');
-const { sendCode } = require('../helpers/mail');
+const { sendCode, sendMail } = require('../helpers/mail');
 const serverError = require('../prototypes/handleError');
 const { generateToken } = require("../helpers/checkJWT");
 
@@ -118,9 +118,41 @@ const resetPassword = async (req, res) => {
     });       
 }    
 
+const sendEmail = async (req, res) => {
+
+    const context = await validator.contextValidation(res, req.body, 
+        { 
+            firstName: 'required|string',
+            lastName: 'required|string',
+            email: 'required|email',
+            message: 'required|string'
+        });
+
+    if(!context) {
+        throw new serverError("Send Email", "Invalid data.", 422);
+    }
+
+    const sentMessage = await sendMail("vitorbretasprata@gmail.com", 
+    context.firstName + " " + context.lastName,
+    context.message,
+    context.email);
+
+    if(!sentMessage.Status) {
+        throw new serverError("Send Email", "An error occuren while sending the email", 500);
+    }
+
+    return res.status(200).send({
+        Status: true,
+        Message: "Message sent."
+    });
+
+}
+
+
 module.exports = {
     Register,
     Login,
     resetPassword,
-    checkEmail    
+    checkEmail,
+    sendEmail
 };

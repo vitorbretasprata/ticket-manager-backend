@@ -36,9 +36,19 @@ const checkEmail = async (req, res) => {
     }
 }
 
+const sendEmail = async (req, res) => {
+    try {
+        const response = await authModel.sendEmail(req, res);
+        return response;
+    } catch (error) {
+        return res.send({ error });
+    }
+}
+
 module.exports = {
     Register,
     Login,
     resetPassword,
-    checkEmail
+    checkEmail,
+    sendEmail
 };
