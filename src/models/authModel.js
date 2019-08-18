@@ -134,8 +134,7 @@ const sendEmail = async (req, res) => {
 
     const sentMessage = await sendMail("vitorbretasprata@gmail.com", 
     context.firstName + " " + context.lastName,
-    context.message,
-    context.email);
+    context.message);
 
     if(!sentMessage.Status) {
         throw new serverError("Send Email", "An error occuren while sending the email", 500);

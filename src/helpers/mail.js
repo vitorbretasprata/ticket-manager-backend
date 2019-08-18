@@ -1,15 +1,12 @@
 const mailGun = require("mailgun-js")({ apiKey: process.env.SECRET_KEY, domain: process.env.EMAIL });
 
-const sendMail = async(user, subject, text, from = process.env.EMAIL) => {
+const sendMail = async(to, subject, text, from = process.env.EMAIL) => {
 
-    const data = {
-        from,
-        to: user,
-        subject,
-        text
-    }
+    const data = { from, to, subject, text }
 
-    const send = await mailGun.messages().send(data);
+        mailGun.messages().send(data, (error, body) => {
+        console.log(body);
+    });
 
     if (!send) {
         return {
