@@ -257,6 +257,35 @@ const requestInfo = async (req, res) => {
     });
 }
 
+const requestQuantity = async (req, res) => {
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    let ct = 12;
+    let monthArray = [];
+    let yearArray = [];
+
+    while (ct >= 1) {
+        
+        
+        if(currentMonth == 1) {
+            currentMonth = 12;
+            yearArray.push(currentYear);
+            currentYear--;
+        } else {
+            monthArray.push(currentMonth);
+            currentMonth--;
+        }    
+        ct--;
+    }
+
+    return res.Status(200).send({
+        Status: true,
+        Message: "Quantity succefully gotten.",
+        yearArray,
+        monthArray
+    });
+}
+
 
 module.exports = {
     requestTickets,
@@ -266,5 +295,6 @@ module.exports = {
     Filter,
     editTicket,
     deleteTicket,
-    requestInfo
+    requestInfo,
+    requestQuantity
 }

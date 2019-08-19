@@ -72,6 +72,15 @@ const requestInfo = async (req, res) => {
     }
 }
 
+const requestQuantity = async (req, res) => {
+    try {
+        const response = await ticketModel.requestQuantity(req, res);
+        return response;
+    } catch (error) {
+        return res.send({ error });
+    }
+}
+
 module.exports = {
     requestTickets,
     requestTicket,
@@ -80,5 +89,6 @@ module.exports = {
     Filter,
     deleteTicket,
     editTicket,
-    requestInfo
+    requestInfo,
+    requestQuantity
 };
