@@ -10,7 +10,7 @@ routes.post('/filter' , validateJWT, controller.Filter);
 routes.delete('/deleteTicket/:id' , validateJWT, controller.deleteTicket);
 routes.put('/editTicket/:id' , validateJWT, controller.editTicket);
 routes.get('/getInfo', validateJWT, controller.requestInfo);
-routes.get('/getQauntity', validateJWT, controller.requestQuantity);
+routes.get('/getQuantity', validateJWT, controller.requestQuantity);
 
 
 

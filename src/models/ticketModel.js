@@ -1,6 +1,7 @@
 const Ticket = require('../schemas/ticket');
 const validator = require("../helpers/check");
 const serverError = require('../prototypes/handleError');
+const mongoose = require('mongoose');
 
 var query = {};
 
@@ -257,32 +258,25 @@ const requestInfo = async (req, res) => {
     });
 }
 
-const requestQuantity = async (req, res) => {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    let ct = 12;
-    let monthArray = [];
-    let yearArray = [];
+const requestQuantity = async (req, res) => {    
+    const result = await Ticket.aggregate([
+    {
+        $match: { CreatorID: new mongoose.Types.ObjectId(req.accountId) }
+    },
+    {
+        $group: { 
+            _id: { 
+                year: { $year: "$DateCreated" }, 
+                month: { $month: "$DateCreated"}
+            },
+            result: { $sum: 1 }
+        }
+    }]);    
 
-    while (ct >= 1) {
-        
-        
-        if(currentMonth == 1) {
-            currentMonth = 12;
-            yearArray.push(currentYear);
-            currentYear--;
-        } else {
-            monthArray.push(currentMonth);
-            currentMonth--;
-        }    
-        ct--;
-    }
-
-    return res.Status(200).send({
+    return res.status(200).send({
         Status: true,
         Message: "Quantity succefully gotten.",
-        yearArray,
-        monthArray
+        result
     });
 }
 
